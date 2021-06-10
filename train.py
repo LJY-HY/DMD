@@ -21,15 +21,15 @@ def get_cifar10(args):
     path = '~/datasets/cifar10'
 
     transform_train = transforms.Compose([
-            #transforms.RandomCrop(32,padding=4),
-            transforms.Resize((300,300)),       #Inception
+            transforms.RandomCrop(32,padding=4),
+            #transforms.Resize((300,300)),       #Inception
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(mean,std),
             ])
 
     transform_test = transforms.Compose([
-        transforms.Resize((300,300)),       #Inception
+        #transforms.Resize((300,300)),       #Inception
         transforms.ToTensor(),
         transforms.Normalize(mean,std),
         ])

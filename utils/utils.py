@@ -14,7 +14,7 @@ np.random.seed(0)
 
 model_dict = {
     'MobileNetv2' : 1280,
-    'MobileNetv3' :
+    #'MobileNetv3' :
     'Inception' : 2048,
     'ShuffleNet' : 1024,
     'ResNet34' : 512,
