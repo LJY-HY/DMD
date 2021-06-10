@@ -16,9 +16,12 @@ mean = (0.5071, 0.4865, 0.4408)
 std = (0.2673, 0.2564, 0.2762)
 
 model_dict = {
-    'MobileNet' : 1280,
+    'MobileNetv2' : 1280,
+    'MobileNetv3' :
     'Inception' : 2048,
-    'ShuffleNet' : 1024
+    'ShuffleNet' : 1024,
+    'ResNet34' : 512,
+    'ResNet50' : 2048
 }
 
 class LinearClassifier(nn.Module):
