@@ -1,6 +1,7 @@
 import torch
 import math
 import numpy as np
+import torch.nn as nn
 from models.MobileNetV2 import *
 from models.InceptionV3 import *
 from models.ShuffleNetV2 import *

@@ -7,9 +7,9 @@ import torchvision.transforms as transforms
 import os
 from tqdm import tqdm
 import argparse
-from utils.arguments import get_arguments
-from utils.utils import *
-from dataset.DMD_5subject import DMD
+from util.arguments import get_arguments
+from util.utils import *
+from dataset.build_dataset import DMD
 
 def main():
     # argument parsing
@@ -19,7 +19,7 @@ def main():
 
     # Get Dataset
     train_dataloader, test_dataloader = DMD(args)
-
+    import pdb;pdb.set_trace()
     # Get architecture
     net = get_architecture(args)
 
