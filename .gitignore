@@ -1,2 +1,4 @@
 ./checkpoint/*
 *.txt
+*.sh
+*/__pycache__/*
