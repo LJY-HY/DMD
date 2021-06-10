@@ -17,7 +17,7 @@ def DMD(args):
     divide_subject(test_subject = args.test_subject)
     train_dataset = ImageFolder(root = '/data/DMD-Driver-Monitoring-Dataset/train', transform = train_TF)
     test_dataset = ImageFolder(root = '/data/DMD-Driver-Monitoring-Dataset/test', transform = test_TF)
-    
+
     train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 8)
     test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 8)
     return train_dataloader, test_dataloader

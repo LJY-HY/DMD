@@ -13,6 +13,9 @@ import torch.nn as nn
 
 np.random.seed(0)
 
+DMD_mean = (0.5,0.5,0.5)
+DMD_std = (0.25,0.25,0.25)
+
 model_dict = {
     'MobileNetv2' : 1280,
     #'MobileNetv3' :
@@ -71,7 +74,7 @@ def get_optim_scheduler(args,net):
     return optimizer, scheduler
 
 def get_transform(mode='train'):
-    normalize = transforms.Normalize(mean = mean, std = std)
+    normalize = transforms.Normalize(mean = DMD_mean, std = DMD_std)
     if mode == 'train':
         TF = transforms.Compose([
             transforms.Resize((640,360)),
@@ -89,16 +92,17 @@ def get_transform(mode='train'):
     return TF
 
 class CropRandomPosition(object):
+    position_idx = [1,0.875,0.75,0.65625]
     def __init__(self):
-        position_idx = [1,0.875,0.75,0.65625]
+        pass
 
     def __call__(self,img):
-        image_dimension = img.size().__len__()
-        h = image_dimension[0]
-        w = image_dimension[1]
-        h_index = int(position_idx(np.random.randint(0,4)) * h)
-        w_index = int(position_idx(np.random.randint(0,4)) * w)
-        new_img = img[:h_index][:w_index]
+        w, h = img.size
+        new_h = int(self.position_idx[np.random.randint(0,4)] * h)
+        new_w = int(self.position_idx[np.random.randint(0,4)] * w)
+        random_starting_point = [(0,0),(w-new_w,0),(0,h-new_h),(w-new_w,h-new_h),(int((w-new_w)/2)-1,int((h-new_h)/2)-1)]
+        starting_point_x, starting_point_y = random_starting_point[np.random.randint(0,5)]
+        new_img = img.crop((starting_point_x,starting_point_y,starting_point_x+new_w,starting_point_y+new_h))
         return new_img
 
 class Rotation(object):
