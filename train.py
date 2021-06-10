@@ -1,15 +1,49 @@
+from utils import get_transform
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import torchvision
 import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+from torch.utils.data import DataLoader, Dataset
+
 import os
 from tqdm import tqdm
 import argparse
-from utils.arguments import get_arguments
-from utils.utils import *
-from dataset.DMD_5subject import DMD
+from arguments import get_arguments
+from utils import *
+#from dataset.DMD_5subject import DMD
+
+def get_cifar10(args):
+    mean = (0.5071, 0.4865, 0.4408)
+    std = (0.2673, 0.2564, 0.2762)
+    path = '~/datasets/cifar10'
+
+    transform_train = transforms.Compose([
+            #transforms.RandomCrop(32,padding=4),
+            transforms.Resize((300,300)),       #Inception
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean,std),
+            ])
+
+    transform_test = transforms.Compose([
+        transforms.Resize((300,300)),       #Inception
+        transforms.ToTensor(),
+        transforms.Normalize(mean,std),
+        ])
+
+    train_loader = DataLoader(
+            datasets.CIFAR10(root=path, train=True, download=True, transform=transform_train),
+            batch_size=256, shuffle=False
+    )
+    test_loader = DataLoader(
+            datasets.CIFAR10(root=path, train=False, download=True, transform=transform_test),
+            batch_size=500, shuffle=False
+    )
+    return train_loader, test_loader
+    
 
 def main():
     # argument parsing
@@ -17,18 +51,22 @@ def main():
     args = get_arguments()
     args.device = torch.device('cuda',args.gpu_id)
 
+    args.num_classes= 13 if args.dataset=='DMD' else 10
+
     # Get Dataset
-    train_dataloader, test_dataloader = DMD(args)
+    #train_dataloader, test_dataloader = DMD(args)
+    train_dataloader, test_dataloader = get_cifar10(args)
 
     # Get architecture
     net = get_architecture(args)
+    net = net.to(args.device)
 
     # Get optimizer, scheduler
     optimizer, scheduler = get_optim_scheduler(args,net)
        
-    CE_loss = nn.CrossEntropyLoss()
+    CE_loss = torch.nn.CrossEntropyLoss()
     training = ''
-    path = './checkpoint/'+args.in_dataset+'/'+training+args.arch+'_'+str(args.epoch)+'_'+str(args.batch_size)+'_'+args.optimizer+'_'+args.scheduler+'_'+str(args.lr)[2:]+'_trial_'+args.trial
+    path = './checkpoint/'+args.arch+'.pth'
     best_acc=0
     for epoch in range(args.epoch):
         train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
@@ -36,9 +74,9 @@ def main():
         scheduler.step()
         if best_acc<acc:
             best_acc = acc
-            if not os.path.isdir('checkpoint/'+args.in_dataset):
-                os.makedirs('checkpoint/'+args.in_dataset)
             torch.save(net.state_dict(), path)
+    
+    print('Best Acc:',best_acc)
 
 def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.train()
@@ -47,9 +85,15 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     loss_average = 0
     for batch_idx, (inputs, targets) in enumerate(train_dataloader):
         inputs, targets = inputs.to(args.device), targets.to(args.device)     
-        outputs = net(inputs)
+
+        if args.arch == 'Inception':
+            outputs,_ = net(inputs)
+        else :
+            outputs = net(inputs)
+
         loss = CE_loss(outputs,targets)
         optimizer.zero_grad()
+
         loss.backward()
         optimizer.step()
         train_loss += loss.item()

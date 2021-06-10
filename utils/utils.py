@@ -8,23 +8,61 @@ import torch.optim as optim
 from torchvision import transforms
 from torch.optim.lr_scheduler import _LRScheduler
 
+import torch.nn as nn
+
 np.random.seed(0)
 
-DMD_mean = (0.5,0.5,0.5)
-DMD_std = (0.25,0.25,0.25)
+mean = (0.5071, 0.4865, 0.4408)
+std = (0.2673, 0.2564, 0.2762)
+
+model_dict = {
+    'MobileNet' : 1280,
+    'Inception' : 2048,
+    'ShuffleNet' : 1024
+}
+
+class LinearClassifier(nn.Module):
+    """Linear classifier"""
+    def __init__(self, name='Inception', num_classes=10):
+        super(LinearClassifier, self).__init__()
+        feat_dim = model_dict[name]
+        self.num_classes = num_classes
+        self.fc = nn.Linear(feat_dim, num_classes)
+
+    def forward(self, features):
+        return self.fc(features)
+
 
 def get_architecture(args):
     if args.arch in ['MobileNet']:
         net = mobilenet_v2(pretrained = True).to(args.device)
-        net.classifier = LinearClassifier(name = 'MobileNet')
+        del net.classifier
+
+        for para in net.parameters():
+            para.requires_grad = False
+        net.classifier = nn.Linear(1280,args.num_classes)
+        
     elif args.arch in ['Inception']:
         net = inception_v3(pretrained = True).to(args.device)
-        net.fc = LinearClassifier(name = 'Inception')
+        del net.fc
+        #del net.AuxLogits
+
+        #net.AuxLogits = InceptionAux(768,num_classes)
+
+        for para in net.parameters():
+            para.requires_grad = False
+        #net.fc = LinearClassifier(name = 'Inception')
+        net.fc = nn.Linear(2048,args.num_classes)
+
     elif args.arch in ['ShuffleNet']:
         net = shufflenet_v2_x1_0(pretrained = True).to(args.device)
-        net.fc = LinearClassifier(name = 'ShuffleNet')
-    for para in net.parameters():
-        para.requires_grad = False
+
+        for para in net.parameters():
+            para.requires_grad = False
+        net.fc = nn.Linear(1024,args.num_classes)
+
+    
+    
     return net
 
 def get_optim_scheduler(args,net):
@@ -47,7 +85,7 @@ def get_optim_scheduler(args,net):
     return optimizer, scheduler
 
 def get_transform(mode='train'):
-    normalize = transforms.Normalize(mean = DMD_mean, std = DMD_std)
+    normalize = transforms.Normalize(mean = mean, std = std)
     if mode == 'train':
         TF = transforms.Compose([
             transforms.Resize((640,360)),
