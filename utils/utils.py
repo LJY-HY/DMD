@@ -12,9 +12,6 @@ import torch.nn as nn
 
 np.random.seed(0)
 
-mean = (0.5071, 0.4865, 0.4408)
-std = (0.2673, 0.2564, 0.2762)
-
 model_dict = {
     'MobileNetv2' : 1280,
     'MobileNetv3' :
@@ -23,18 +20,6 @@ model_dict = {
     'ResNet34' : 512,
     'ResNet50' : 2048
 }
-
-class LinearClassifier(nn.Module):
-    """Linear classifier"""
-    def __init__(self, name='Inception', num_classes=10):
-        super(LinearClassifier, self).__init__()
-        feat_dim = model_dict[name]
-        self.num_classes = num_classes
-        self.fc = nn.Linear(feat_dim, num_classes)
-
-    def forward(self, features):
-        return self.fc(features)
-
 
 def get_architecture(args):
     if args.arch in ['MobileNet']:
@@ -48,13 +33,10 @@ def get_architecture(args):
     elif args.arch in ['Inception']:
         net = inception_v3(pretrained = True).to(args.device)
         del net.fc
-        #del net.AuxLogits
-
-        #net.AuxLogits = InceptionAux(768,num_classes)
 
         for para in net.parameters():
             para.requires_grad = False
-        #net.fc = LinearClassifier(name = 'Inception')
+       
         net.fc = nn.Linear(2048,args.num_classes)
 
     elif args.arch in ['ShuffleNet']:
