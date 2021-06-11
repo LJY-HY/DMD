@@ -10,9 +10,10 @@ from torch.utils.data import DataLoader, Dataset
 import os
 from tqdm import tqdm
 import argparse
-from utils.arguments import get_arguments
-from utils.utils import *
-#from dataset.DMD_5subject import DMD
+
+from util.arguments import get_arguments
+from util.utils import *
+from dataset.build_DMD import DMD
 
 def get_cifar10(args):
     mean = (0.5071, 0.4865, 0.4408)
@@ -53,8 +54,8 @@ def main():
     args.num_classes= 13 if args.dataset=='DMD' else 10
 
     # Get Dataset
-    #train_dataloader, test_dataloader = DMD(args)
-    train_dataloader, test_dataloader = get_cifar10(args)
+    train_dataloader, test_dataloader = DMD(args)
+    # train_dataloader, test_dataloader = get_cifar10(args)
 
     # Get architecture
     net = get_architecture(args)
