@@ -2,8 +2,10 @@ import torch
 import math
 import numpy as np
 from models.MobileNetV2 import *
+from models.MobileNetV3 import *
 from models.InceptionV3 import *
 from models.ShuffleNetV2 import *
+from models.ResNet import *
 import torch.optim as optim
 from torchvision import transforms
 from torch.optim.lr_scheduler import _LRScheduler
@@ -14,7 +16,8 @@ np.random.seed(0)
 
 model_dict = {
     'MobileNetv2' : 1280,
-    #'MobileNetv3' :
+    'MobileNetv3_small' : 576,
+    'MobileNetv3_large' : 960,
     'Inception' : 2048,
     'ShuffleNet' : 1024,
     'ResNet34' : 512,
@@ -22,29 +25,60 @@ model_dict = {
 }
 
 def get_architecture(args):
+    output_channel =0
     if args.arch in ['MobileNet']:
-        net = mobilenet_v2(pretrained = True).to(args.device)
+        if args.version == '3_l':
+            net = mobilenet_v3_large(pretrained = True).to(args.device)
+            output_channel = 960
+        elif args.version == '3_s':
+            net = mobilenet_v3_small(pretrained = True).to(args.device)
+            output_channel = 576
+        else :
+            net = mobilenet_v2(pretrained = True).to(args.device)
+            output_channel = 1280
+
         del net.classifier
 
         for para in net.parameters():
             para.requires_grad = False
-        net.classifier = nn.Linear(1280,args.num_classes)
+
+        net.classifier = nn.Linear(output_channel,args.num_classes)
         
     elif args.arch in ['Inception']:
         net = inception_v3(pretrained = True).to(args.device)
+        output_channel = 2048
         del net.fc
 
         for para in net.parameters():
             para.requires_grad = False
        
-        net.fc = nn.Linear(2048,args.num_classes)
+        net.fc = nn.Linear(output_channel,args.num_classes)
 
     elif args.arch in ['ShuffleNet']:
         net = shufflenet_v2_x1_0(pretrained = True).to(args.device)
+        output_channel = 1024
 
+        del net.fc
         for para in net.parameters():
             para.requires_grad = False
-        net.fc = nn.Linear(1024,args.num_classes)
+
+        net.fc = nn.Linear(output_channel,args.num_classes)
+    
+    elif args.arch in ['ResNet']:
+        if args.version == '34' :
+            net = resnet34(pretrained=True).to(args.device)
+            output_channel = 512
+        else :
+            net = resnet50(pretrained=True).to(args.device)
+            output_channel = 2048
+        del net.fc
+
+        for para in net.parameters():
+            para.requires_grad=False
+
+        net.fc = nn.Linear(output_channel, args.num_classes)
+
+        
 
     
     

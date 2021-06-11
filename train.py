@@ -1,4 +1,3 @@
-from utils import get_transform
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,8 +10,8 @@ from torch.utils.data import DataLoader, Dataset
 import os
 from tqdm import tqdm
 import argparse
-from arguments import get_arguments
-from utils import *
+from utils.arguments import get_arguments
+from utils.utils import *
 #from dataset.DMD_5subject import DMD
 
 def get_cifar10(args):
@@ -76,7 +75,7 @@ def main():
             best_acc = acc
             torch.save(net.state_dict(), path)
     
-    print('Best Acc:',best_acc)
+    print('Best Acc:', best_acc)
 
 def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.train()
