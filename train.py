@@ -67,22 +67,35 @@ def main():
     training = ''
     path = './checkpoint/'+args.arch+'_'+args.dataset+'.pth'
     result = './checkpoint/'+args.arch+'_'+args.dataset+'.txt'
+    
     best_acc=0
+    acc=0
+    best_train=0
+    train_best = 0
     for epoch in range(args.epoch):
-        train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
+        train_acc,_ = train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
         acc = test(args, net, test_dataloader, optimizer, scheduler, CE_loss, epoch)
         scheduler.step()
+
+        if train_acc > train_best:
+            train_best = train_acc
+
         if best_acc<acc:
             best_acc = acc
+            best_train = train_acc
             torch.save(net.state_dict(), path)
     
     import sys
     sys.stdout = open()
     print('Best Acc:', best_acc)
+    print('Train Acc at best acc:', best_train)
+    print('Best Train Acc:', train_best)
+    print('Last Acc:', acc)
 
 def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.train()
     train_loss = 0
+    acc = 0
     p_bar = tqdm(range(train_dataloader.__len__()))
     loss_average = 0
     for batch_idx, (inputs, targets) in enumerate(train_dataloader):
@@ -99,6 +112,7 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
+        acc += sum(outputs.argmax(dim=1)==targets)
         p_bar.set_description("Train Epoch: {epoch}/{epochs:2}. Iter: {batch:4}/{iter:4}. LR: {lr:.6f}. loss: {loss:.4f}.".format(
                     epoch=epoch + 1,
                     epochs=args.epoch,
@@ -109,7 +123,8 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
                     )
         p_bar.update()
     p_bar.close()
-    return train_loss/train_dataloader.__len__()        # average train_loss
+    
+    return acc/train_dataloader.dataset.__len__(), train_loss/train_dataloader.__len__()        # average train_loss
 
 def test(args, net, test_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.eval()
