@@ -117,6 +117,7 @@ def get_transform(mode='train'):
         ])
     elif mode == 'test':
         TF = transforms.Compose([
+        transforms.Resize((224,224)),
         transforms.ToTensor(),
         normalize,
         ])

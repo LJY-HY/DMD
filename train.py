@@ -74,6 +74,7 @@ def main():
     train_best = 0
     for epoch in range(args.epoch):
         train_acc,_ = train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
+        print('train_acc:',train_acc)
         acc = test(args, net, test_dataloader, optimizer, scheduler, CE_loss, epoch)
         scheduler.step()
 
