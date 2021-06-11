@@ -1,1 +1,0 @@
-python3 train.py --dataset DMD --test_subject 3 --arch MobileNet

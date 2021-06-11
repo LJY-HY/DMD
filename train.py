@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, Dataset
 import os
 from tqdm import tqdm
 import argparse
+
 from util.arguments import get_arguments
 from util.utils import *
 from dataset.build_DMD import DMD
@@ -53,8 +54,7 @@ def main():
     args.num_classes= 13 if args.dataset=='DMD' else 10
 
     # Get Dataset
-    train_dataloader, test_dataloader = DMD(args)
-    # train_dataloader, test_dataloader = get_cifar10(args)
+    train_dataloader, test_dataloader = DMD(args) if args.dataset=='DMD' else get_cifar10(args)
 
     # Get architecture
     net = get_architecture(args)
@@ -65,21 +65,38 @@ def main():
        
     CE_loss = torch.nn.CrossEntropyLoss()
     training = ''
-    path = './checkpoint/'+args.arch+'.pth'
+    path = './checkpoint/'+args.arch+'_'+args.dataset+'.pth'
+    result = './checkpoint/'+args.arch+'_'+args.dataset+'.txt'
+    
     best_acc=0
+    acc=0
+    best_train=0
+    train_best = 0
     for epoch in range(args.epoch):
-        train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
+        train_acc,_ = train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
+        print('train_acc:',train_acc)
         acc = test(args, net, test_dataloader, optimizer, scheduler, CE_loss, epoch)
         scheduler.step()
+
+        if train_acc > train_best:
+            train_best = train_acc
+
         if best_acc<acc:
             best_acc = acc
+            best_train = train_acc
             torch.save(net.state_dict(), path)
     
-    print('Best Acc:',best_acc)
+    import sys
+    sys.stdout = open()
+    print('Best Acc:', best_acc)
+    print('Train Acc at best acc:', best_train)
+    print('Best Train Acc:', train_best)
+    print('Last Acc:', acc)
 
 def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.train()
     train_loss = 0
+    acc = 0
     p_bar = tqdm(range(train_dataloader.__len__()))
     loss_average = 0
     for batch_idx, (inputs, targets) in enumerate(train_dataloader):
@@ -96,6 +113,7 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
+        acc += sum(outputs.argmax(dim=1)==targets)
         p_bar.set_description("Train Epoch: {epoch}/{epochs:2}. Iter: {batch:4}/{iter:4}. LR: {lr:.6f}. loss: {loss:.4f}.".format(
                     epoch=epoch + 1,
                     epochs=args.epoch,
@@ -106,7 +124,8 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
                     )
         p_bar.update()
     p_bar.close()
-    return train_loss/train_dataloader.__len__()        # average train_loss
+    
+    return acc/train_dataloader.dataset.__len__(), train_loss/train_dataloader.__len__()        # average train_loss
 
 def test(args, net, test_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.eval()
