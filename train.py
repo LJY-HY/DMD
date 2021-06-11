@@ -54,8 +54,7 @@ def main():
     args.num_classes= 13 if args.dataset=='DMD' else 10
 
     # Get Dataset
-    train_dataloader, test_dataloader = DMD(args)
-    # train_dataloader, test_dataloader = get_cifar10(args)
+    train_dataloader, test_dataloader = DMD(args) if args.dataset=='DMD' else get_cifar10(args)
 
     # Get architecture
     net = get_architecture(args)
@@ -66,7 +65,8 @@ def main():
        
     CE_loss = torch.nn.CrossEntropyLoss()
     training = ''
-    path = './checkpoint/'+args.arch+'.pth'
+    path = './checkpoint/'+args.arch+'_'+args.dataset+'.pth'
+    result = './checkpoint/'+args.arch+'_'+args.dataset+'.txt'
     best_acc=0
     for epoch in range(args.epoch):
         train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
@@ -76,6 +76,8 @@ def main():
             best_acc = acc
             torch.save(net.state_dict(), path)
     
+    import sys
+    sys.stdout = open()
     print('Best Acc:', best_acc)
 
 def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):

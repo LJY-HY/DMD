@@ -21,7 +21,7 @@ DMD_std = (0.25,0.25,0.25)
 model_dict = {
     'MobileNetv2' : 1280,
     'MobileNetv3_small' : 576,
-    'MobileNetv3_large' : 960,
+    #'MobileNetv3_large' : 960,
     'Inception' : 2048,
     'ShuffleNet' : 1024,
     'ResNet34' : 512,
@@ -30,24 +30,24 @@ model_dict = {
 
 def get_architecture(args):
     output_channel =0
-    if args.arch in ['MobileNet']:
-        if args.version == '3_l':
-            net = mobilenet_v3_large(pretrained = True).to(args.device)
-            output_channel = 960
-        elif args.version == '3_s':
-            net = mobilenet_v3_small(pretrained = True).to(args.device)
-            output_channel = 576
-        else :
-            net = mobilenet_v2(pretrained = True).to(args.device)
-            output_channel = 1280
+    if args.arch in ['MobileNetv2']:
+        net = mobilenet_v2(pretrained = True).to(args.device)
+        output_channel = 1280
 
         del net.classifier
-
         for para in net.parameters():
             para.requires_grad = False
-
         net.classifier = nn.Linear(output_channel,args.num_classes)
-        
+    
+    elif args.arch in ['MobileNetv3']:
+        net = mobilenet_v3_large(pretrained = True).to(args.device)
+        output_channel = 960
+
+        del net.classifier
+        for para in net.parameters():
+            para.requires_grad = False
+        net.classifier = nn.Linear(output_channel,args.num_classes)
+    
     elif args.arch in ['Inception']:
         net = inception_v3(pretrained = True).to(args.device)
         output_channel = 2048
@@ -55,7 +55,6 @@ def get_architecture(args):
 
         for para in net.parameters():
             para.requires_grad = False
-       
         net.fc = nn.Linear(output_channel,args.num_classes)
 
     elif args.arch in ['ShuffleNet']:
@@ -65,27 +64,26 @@ def get_architecture(args):
         del net.fc
         for para in net.parameters():
             para.requires_grad = False
-
         net.fc = nn.Linear(output_channel,args.num_classes)
     
-    elif args.arch in ['ResNet']:
-        if args.version == '34' :
-            net = resnet34(pretrained=True).to(args.device)
-            output_channel = 512
-        else :
-            net = resnet50(pretrained=True).to(args.device)
-            output_channel = 2048
-        del net.fc
+    elif args.arch in ['ResNet34']:
+        net = resnet34(pretrained=True).to(args.device)
+        output_channel = 512
 
+        del net.fc
         for para in net.parameters():
             para.requires_grad=False
-
         net.fc = nn.Linear(output_channel, args.num_classes)
 
-        
+    elif args.arch in ['ResNet50']:
+        net = resnet50(pretrained=True).to(args.device)
+        output_channel = 2048
 
-    
-    
+        del net.fc
+        for para in net.parameters():
+            para.requires_grad=False
+        net.fc = nn.Linear(output_channel, args.num_classes)
+
     return net
 
 def get_optim_scheduler(args,net):
