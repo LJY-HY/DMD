@@ -18,8 +18,8 @@ def DMD(args):
     train_dataset = ImageFolder(root = '/data/DMD-Driver-Monitoring-Dataset/train', transform = train_TF)
     test_dataset = ImageFolder(root = '/data/DMD-Driver-Monitoring-Dataset/test', transform = test_TF)
 
-    train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 8)
-    test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 8)
+    train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
+    test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
     return train_dataloader, test_dataloader
 
 def divide_subject(test_subject = 1):

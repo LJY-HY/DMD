@@ -30,59 +30,131 @@ model_dict = {
 
 def get_architecture(args):
     output_channel =0
+    in_channel_1 = 1024
+    in_channel_2 = 512
+
     if args.arch in ['MobileNetv2']:
         net = mobilenet_v2(pretrained = True).to(args.device)
         output_channel = 1280
-
         del net.classifier
-        for para in net.parameters():
-            para.requires_grad = False
-        net.classifier = nn.Linear(output_channel,args.num_classes)
+        layer_count = 0
+        for child in net.children():
+            layer_count+=1
+            if layer_count< int(len(list(net.children()))*3/4):
+                for param in child.parameters():
+                    param.requires_grad=False
+        net.classifier = nn.Sequential(
+                        nn.Linear(output_channel, in_channel_1),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.5),
+                        nn.Linear(in_channel_1, in_channel_2),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.2),
+                        nn.Linear(in_channel_2,args.num_classes),
+                        )
     
     elif args.arch in ['MobileNetv3']:
         net = mobilenet_v3_large(pretrained = True).to(args.device)
         output_channel = 960
 
         del net.classifier
-        for para in net.parameters():
-            para.requires_grad = False
-        net.classifier = nn.Linear(output_channel,args.num_classes)
+        layer_count = 0
+        for child in net.children():
+            layer_count+=1
+            if layer_count< int(len(list(net.children()))*3/4):
+                for param in child.parameters():
+                    param.requires_grad=False
+        net.classifier = nn.Sequential(
+                        nn.Linear(output_channel, in_channel_1),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.5),
+                        nn.Linear(in_channel_1, in_channel_2),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.2),
+                        nn.Linear(in_channel_2,args.num_classes),
+                        )
     
     elif args.arch in ['Inception']:
         net = inception_v3(pretrained = True).to(args.device)
         output_channel = 2048
         del net.fc
-
-        for para in net.parameters():
-            para.requires_grad = False
-        net.fc = nn.Linear(output_channel,args.num_classes)
+        layer_count = 0
+        for child in net.children():
+            layer_count+=1
+            if layer_count< int(len(list(net.children()))*3/4):
+                for param in child.parameters():
+                    param.requires_grad=False
+        net.fc = nn.Sequential(
+                        nn.Linear(output_channel, in_channel_1),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.5),
+                        nn.Linear(in_channel_1, in_channel_2),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.2),
+                        nn.Linear(in_channel_2,args.num_classes),
+                        )
 
     elif args.arch in ['ShuffleNet']:
         net = shufflenet_v2_x1_0(pretrained = True).to(args.device)
         output_channel = 1024
 
         del net.fc
-        for para in net.parameters():
-            para.requires_grad = False
-        net.fc = nn.Linear(output_channel,args.num_classes)
+        layer_count = 0
+        for child in net.children():
+            layer_count+=1
+            if layer_count< int(len(list(net.children()))*3/4):
+                for param in child.parameters():
+                    param.requires_grad=False
+        net.fc = nn.Sequential(
+                        nn.Linear(output_channel, in_channel_1),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.5),
+                        nn.Linear(in_channel_1, in_channel_2),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.2),
+                        nn.Linear(in_channel_2,args.num_classes),
+                        )
     
     elif args.arch in ['ResNet34']:
         net = resnet34(pretrained=True).to(args.device)
         output_channel = 512
 
         del net.fc
-        for para in net.parameters():
-            para.requires_grad=False
-        net.fc = nn.Linear(output_channel, args.num_classes)
+        layer_count = 0
+        for child in net.children():
+            layer_count+=1
+            if layer_count< int(len(list(net.children()))*3/4):
+                for param in child.parameters():
+                    param.requires_grad=False
+        net.fc = nn.Sequential(
+                        nn.Linear(output_channel, in_channel_1),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.5),
+                        nn.Linear(in_channel_1, in_channel_2),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.2),
+                        nn.Linear(in_channel_2,args.num_classes),
+                        )
 
     elif args.arch in ['ResNet50']:
         net = resnet50(pretrained=True).to(args.device)
         output_channel = 2048
-
         del net.fc
-        for para in net.parameters():
-            para.requires_grad=False
-        net.fc = nn.Linear(output_channel, args.num_classes)
+        layer_count = 0
+        for child in net.children():
+            layer_count+=1
+            if layer_count< int(len(list(net.children()))*3/4):
+                for param in child.parameters():
+                    param.requires_grad=False
+        net.fc = nn.Sequential(
+                        nn.Linear(output_channel, in_channel_1),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.5),
+                        nn.Linear(in_channel_1, in_channel_2),
+                        nn.ReLU(),
+                        nn.Dropout(p=0.2),
+                        nn.Linear(in_channel_2,args.num_classes),
+                        )
 
     return net
 
@@ -106,13 +178,10 @@ def get_optim_scheduler(args,net):
     return optimizer, scheduler
 
 def get_transform(mode='train'):
-    # p = Augmentor.Pipeline(DMD_path)
-    # p.skew_tilt(probability=0.5)
     normalize = transforms.Normalize(mean = DMD_mean, std = DMD_std)
     if mode == 'train':
         TF = transforms.Compose([
             transforms.Resize((640,360)),
-            # p.torch_transform(),
             CropRandomPosition(),
             transforms.Resize((224,224)),
             transforms.ToTensor(),

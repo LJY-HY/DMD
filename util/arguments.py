@@ -9,7 +9,7 @@ def get_arguments():
     parser.add_argument('--optimizer', default = 'SGD', type=str, choices = ['SGD','Nesterov','Adam','AdamW'])
     parser.add_argument('--lr', default = 0.001, type=float, choices = [1.0,0.1,0.01,0.001,0.0005,0.0002,0.0001])
     parser.add_argument('--epoch', default=40, type=int, help='number of total epochs')
-    parser.add_argument('--batch_size', default=64, type=int, choices=[32,64])
+    parser.add_argument('--batch_size', default=64, type=int, choices=[32,64,128])
     parser.add_argument('--test_subject', default=1, type = int, choices=[0,1,2,3,4])
     parser.add_argument('--dropout_rate', default=0.5, type=float, choices=[0,0.3,0.5,0.7])
     parser.add_argument('--scheduler', default='MultiStepLR', type=str, choices=['MultiStepLR','CosineAnnealing','CosineWarmup'])
