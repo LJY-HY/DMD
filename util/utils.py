@@ -20,7 +20,7 @@ DMD_std = (0.25,0.25,0.25)
 DMD_path = "/data/DMD-Driver-Monitoring-Dataset/train"
 model_dict = {
     'MobileNetv2' : 1280,
-    'MobileNetv3_small' : 576,
+    #'MobileNetv3_small' : 576,
     #'MobileNetv3_large' : 960,
     'Inception' : 2048,
     'ShuffleNet' : 1024,
