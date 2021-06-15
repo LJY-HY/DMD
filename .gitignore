@@ -3,3 +3,4 @@
 *.sh
 */__pycache__/*
 checkpoint/
+*.pyc

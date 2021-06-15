@@ -10,14 +10,14 @@ from models.ResNet import *
 import torch.optim as optim
 from torchvision import transforms
 from torch.optim.lr_scheduler import _LRScheduler
-
+# import Augmentor
 import torch.nn as nn
 
 np.random.seed(0)
 
 DMD_mean = (0.5,0.5,0.5)
 DMD_std = (0.25,0.25,0.25)
-
+DMD_path = "/data/DMD-Driver-Monitoring-Dataset/train"
 model_dict = {
     'MobileNetv2' : 1280,
     'MobileNetv3_small' : 576,
@@ -106,10 +106,13 @@ def get_optim_scheduler(args,net):
     return optimizer, scheduler
 
 def get_transform(mode='train'):
+    # p = Augmentor.Pipeline(DMD_path)
+    # p.skew_tilt(probability=0.5)
     normalize = transforms.Normalize(mean = DMD_mean, std = DMD_std)
     if mode == 'train':
         TF = transforms.Compose([
             transforms.Resize((640,360)),
+            # p.torch_transform(),
             CropRandomPosition(),
             transforms.Resize((224,224)),
             transforms.ToTensor(),

@@ -7,7 +7,7 @@ def get_arguments():
     parser.add_argument('--arch', default = 'MobileNet', type=str, choices = ['Inception','MobileNetv2','MobileNetv3','ShuffleNet','ResNet34','ResNet50'])
     #parser.add_argument('--version', default='2', type=str, choices=['2','3_l','3_s','34','50'])
     parser.add_argument('--optimizer', default = 'SGD', type=str, choices = ['SGD','Nesterov','Adam','AdamW'])
-    parser.add_argument('--lr', default = 0.001, type=float, choices = [1.0,0.1,0.001,0.0005,0.0002,0.0001])
+    parser.add_argument('--lr', default = 0.001, type=float, choices = [1.0,0.1,0.01,0.001,0.0005,0.0002,0.0001])
     parser.add_argument('--epoch', default=40, type=int, help='number of total epochs')
     parser.add_argument('--batch_size', default=64, type=int, choices=[32,64])
     parser.add_argument('--test_subject', default=1, type = int, choices=[0,1,2,3,4])
