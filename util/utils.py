@@ -20,7 +20,7 @@ DMD_std = (0.25,0.25,0.25)
 
 model_dict = {
     'MobileNetv2' : 1280,
-    'MobileNetv3_small' : 576,
+    #'MobileNetv3_small' : 576,
     #'MobileNetv3_large' : 960,
     'Inception' : 2048,
     'ShuffleNet' : 1024,

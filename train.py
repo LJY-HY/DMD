@@ -51,7 +51,7 @@ def main():
     args = get_arguments()
     args.device = torch.device('cuda',args.gpu_id)
 
-    args.num_classes= 13 if args.dataset=='DMD' else 10
+    args.num_classes = 11 if args.dataset=='DMD' else 10
 
     # Get Dataset
     train_dataloader, test_dataloader = DMD(args) if args.dataset=='DMD' else get_cifar10(args)
@@ -87,7 +87,7 @@ def main():
             torch.save(net.state_dict(), path)
     
     import sys
-    sys.stdout = open()
+    sys.stdout = open(result,'a')
     print('Best Acc:', best_acc)
     print('Train Acc at best acc:', best_train)
     print('Best Train Acc:', train_best)
