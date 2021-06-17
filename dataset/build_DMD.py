@@ -1,16 +1,32 @@
 import shutil
-import numpy as np
-from PIL import Image
 import os
-import torch
-from torch.utils.data import DataLoader, dataloader
-from torchvision import datasets
-from torchvision import transforms
-from torch.utils.data import random_split, Subset
+from torch.utils.data import DataLoader
 from util.utils import *
 from torchvision.datasets import ImageFolder
 
 def DMD(args):
+    '''
+    Num of Class : 11
+    classes =  ['change_gear',
+                'drinking',
+                'hair_and_makeup',
+                'phonecall_left',       ---> 'phonecall'
+                'phonecall_right',      ---> 'phonecall'
+                'radio',
+                'reach_backseat',
+                'reach_side',
+                'safe_drive',
+                'standstill_or_waiting',
+                'talking_to_passenger',
+                'texting_left',         ---> 'texting'
+                'texting_right',        ---> 'texting'
+                'unclassified'          ---> deprecated
+                ]
+
+    1) 'phonecall_left' and 'phonecall_right' are combined as phonecall
+    2) 'texting_left' and 'texting_right' are combined as texting
+    3) 'unclassified' is not considered as a single class
+    '''
     train_TF = get_transform('train')
     test_TF = get_transform('test')
 
