@@ -40,7 +40,7 @@ def get_architecture(args):
         layer_count = 0
         for child in net.children():
             layer_count+=1
-            if layer_count< int(len(list(net.children()))*3/4):
+            if layer_count< int(len(list(net.children()))* args.freeze):
                 for param in child.parameters():
                     param.requires_grad=False
         net.classifier = nn.Sequential(
@@ -61,7 +61,7 @@ def get_architecture(args):
         layer_count = 0
         for child in net.children():
             layer_count+=1
-            if layer_count< int(len(list(net.children()))*3/4):
+            if layer_count< int(len(list(net.children()))* args.freeze):
                 for param in child.parameters():
                     param.requires_grad=False
         net.classifier = nn.Sequential(
@@ -81,7 +81,7 @@ def get_architecture(args):
         layer_count = 0
         for child in net.children():
             layer_count+=1
-            if layer_count< int(len(list(net.children()))*3/4):
+            if layer_count< int(len(list(net.children()))* args.freeze):
                 for param in child.parameters():
                     param.requires_grad=False
         net.fc = nn.Sequential(
@@ -102,7 +102,7 @@ def get_architecture(args):
         layer_count = 0
         for child in net.children():
             layer_count+=1
-            if layer_count< int(len(list(net.children()))*3/4):
+            if layer_count< int(len(list(net.children()))* args.freeze):
                 for param in child.parameters():
                     param.requires_grad=False
         net.fc = nn.Sequential(
@@ -123,7 +123,7 @@ def get_architecture(args):
         layer_count = 0
         for child in net.children():
             layer_count+=1
-            if layer_count< int(len(list(net.children()))*3/4):
+            if layer_count< int(len(list(net.children()))* args.freeze):
                 for param in child.parameters():
                     param.requires_grad=False
         net.fc = nn.Sequential(
@@ -143,7 +143,7 @@ def get_architecture(args):
         layer_count = 0
         for child in net.children():
             layer_count+=1
-            if layer_count< int(len(list(net.children()))*3/4):
+            if layer_count< int(len(list(net.children()))* args.freeze):
                 for param in child.parameters():
                     param.requires_grad=False
         net.fc = nn.Sequential(
