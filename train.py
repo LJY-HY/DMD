@@ -1,19 +1,17 @@
+from dataset.build_StateFarm import StateFarm
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
-import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
-import os
 from tqdm import tqdm
 import argparse
 
 from util.arguments import get_arguments
 from util.utils import *
 from dataset.build_DMD import DMD
+from dataset.build_StateFarm import StateFarm
 
 def get_cifar10(args):
     mean = (0.5071, 0.4865, 0.4408)
@@ -51,10 +49,11 @@ def main():
     args = get_arguments()
     args.device = torch.device('cuda',args.gpu_id)
 
-    args.num_classes = 11 if args.dataset=='DMD' else 10
+    args.num_classes = 11
+    # args.num_classes = 11 if args.dataset=='DMD' else 10
 
     # Get Dataset
-    train_dataloader, test_dataloader = DMD(args) if args.dataset=='DMD' else get_cifar10(args)
+    train_dataloader, test_dataloader = globals()[args.dataset](args)
 
     # Get architecture
     net = get_architecture(args)

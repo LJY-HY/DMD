@@ -15,9 +15,8 @@ import torch.nn as nn
 
 np.random.seed(0)
 
-DMD_mean = (0.5,0.5,0.5)
-DMD_std = (0.25,0.25,0.25)
-DMD_path = "/data/DMD-Driver-Monitoring-Dataset/train"
+mean_temp = (0.5,0.5,0.5)
+std_temp = (0.25,0.25,0.25)
 model_dict = {
     'MobileNetv2' : 1280,
     #'MobileNetv3_small' : 576,
@@ -178,7 +177,7 @@ def get_optim_scheduler(args,net):
     return optimizer, scheduler
 
 def get_transform(mode='train'):
-    normalize = transforms.Normalize(mean = DMD_mean, std = DMD_std)
+    normalize = transforms.Normalize(mean = mean_temp, std = std_temp)
     if mode == 'train':
         TF = transforms.Compose([
             transforms.Resize((640,360)),

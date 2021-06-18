@@ -3,7 +3,7 @@ import argparse
 def get_arguments():
     parser = argparse.ArgumentParser(description = 'Training Arguments')
     parser.add_argument('--gpu_id', default='0', type=int, help='id(s) for CUDA_VISIBLE_DEVICES')
-    parser.add_argument('--dataset', default='DMD', type=str, choices=['cifar10','DMD'])
+    parser.add_argument('--dataset', default='DMD', type=str, choices=['cifar10','DMD','StateFarm'])
     parser.add_argument('--arch', default = 'MobileNet', type=str, choices = ['Inception','MobileNetv2','MobileNetv3','ShuffleNet','ResNet34','ResNet50'])
     #parser.add_argument('--version', default='2', type=str, choices=['2','3_l','3_s','34','50'])
     parser.add_argument('--optimizer', default = 'SGD', type=str, choices = ['SGD','Nesterov','Adam','AdamW'])
