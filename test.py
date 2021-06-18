@@ -47,8 +47,8 @@ def main():
     net = net.to(args.device)
 
     CE_loss = torch.nn.CrossEntropyLoss()
-    path = './checkpoint/'+args.arch+'_'+args.train_dataset+'.pth'
-    result = './checkpoint/'+args.arch+'_'+args.train_dataset+'.txt'
+    path = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'.pth'
+    result = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'.txt'
     
     # Load checkpoint
     state_dict = torch.load(path)

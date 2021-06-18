@@ -28,5 +28,6 @@ def get_arguments_test():
     parser.add_argument('--arch', default = 'MobileNet', type=str, choices = ['Inception','MobileNetv2','MobileNetv3','ShuffleNet','ResNet34','ResNet50'])
     parser.add_argument('--batch_size', default=128, type=int, choices=[32,64,128])
     parser.add_argument('--trial', default = '0', type=str)
+    parser.add_argument('--freeze', default = 0.75, type=float, help = 'freeze rate of pretrained network')
     args = parser.parse_args()
     return args
