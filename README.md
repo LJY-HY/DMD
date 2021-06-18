@@ -1,3 +1,3 @@
 # DMD
-DMD training framework
+DMD training framework with Imagenet pretrained networks
 
