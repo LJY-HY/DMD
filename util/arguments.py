@@ -19,3 +19,14 @@ def get_arguments():
     parser.add_argument('--freeze', default=0.75, type=float, help = 'freeze rate of pretrained network')
     args = parser.parse_args()
     return args
+
+def get_arguments_test():
+    parser = argparse.ArgumentParser(description = 'Training Arguments')
+    parser.add_argument('--gpu_id', default='0', type=int, help='id(s) for CUDA_VISIBLE_DEVICES')
+    parser.add_argument('--train_dataset', default='DMD', type=str, choices=['DMD','StateFarm'])
+    parser.add_argument('--test_dataset',default = 'DMD', type = str, choices = ['DMD','StateFarm'])
+    parser.add_argument('--arch', default = 'MobileNet', type=str, choices = ['Inception','MobileNetv2','MobileNetv3','ShuffleNet','ResNet34','ResNet50'])
+    parser.add_argument('--batch_size', default=128, type=int, choices=[32,64,128])
+    parser.add_argument('--trial', default = '0', type=str)
+    args = parser.parse_args()
+    return args

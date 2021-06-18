@@ -34,7 +34,7 @@ def StateFarm(args):
     make_ImageFolder(test_subject_list, division = 'test')
 
     train_dataset = ImageFolder(root = '/data/driver_detection/train', transform = train_TF)
-    test_dataset = ImageFolder(root = '/data/driver_detection/test', transform = train_TF)
+    test_dataset = ImageFolder(root = '/data/driver_detection/test', transform = test_TF)
 
     train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
     test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
