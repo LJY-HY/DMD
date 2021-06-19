@@ -1,16 +1,26 @@
 import torch
-import torch.nn.functional as F
+
 import torchvision.transforms as transforms
-import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
-import os
-from tqdm import tqdm
+from torchvision.datasets import ImageFolder
+
 import argparse
 
 from util.arguments import get_arguments
 from util.utils import *
-from dataset.build_DMD import DMD
 
+
+def DMD(args):
+    TF = transforms.Compose([
+        transforms.ToTensor()
+        ])
+        
+    train_dataset = ImageFolder(root = '/data/DMD-Driver-Monitoring-Dataset/train', transform = TF)
+    test_dataset = ImageFolder(root = '/data/DMD-Driver-Monitoring-Dataset/test', transform = TF)
+
+    train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
+    test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
+    return train_dataloader, test_dataloader
 
 def main():
     # argument parsing
@@ -28,7 +38,7 @@ def main():
 
     # Get Dataset
     train_dataloader, _ = globals()[args.dataset](args)
-    mean, std = get_DMD_info(path_DMD, train_dataloader)
+    mean, std = get_DMD_info(train_dataloader, force=True)
     print(f'Get mean and std on {args.dataset} dataset')
 
     print(f'{mean},{std}')

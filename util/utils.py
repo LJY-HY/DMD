@@ -16,6 +16,8 @@ from torch.optim.lr_scheduler import _LRScheduler
 # import Augmentor
 import torch.nn as nn
 
+import pdb
+
 np.random.seed(0)
 
 mean_temp = (0.5,0.5,0.5)
@@ -373,10 +375,10 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
 
 # TODO : Get exact DMD_mean and DMD_std
 # Need to verify
-def get_DMD_info(data_path, data_loader):
+def get_DMD_info(data_loader, force):
     # Use train data if possible
 
-    if os.path.isfile("./train_data_mean_std.json"):
+    if os.path.isfile("./train_data_mean_std.json") and not force:
         with open("./train_data_mean_std.json", 'r') as jf:
             mean, std = json.load(jf)
 
@@ -387,8 +389,13 @@ def get_DMD_info(data_path, data_loader):
             batch_samples = images.size(0) 
             images = images.view(batch_samples, images.size(1), -1)
             mean += images.mean(2).sum(0)
-            var += ((images - mean.unsqueeze(1))**2).sum([0,2])
         mean = mean / len(data_loader.dataset)
+
+        for images, _ in data_loader:
+            batch_samples = images.size(0) 
+            images = images.view(batch_samples, images.size(1), -1)
+            var += ((images - mean.unsqueeze(1))**2).sum([0,2])
+        pdb.set_trace()
         std = torch.sqrt(var / (len(data_loader.dataset)*1280*720)) # resolution of DMD set is 1280*720
 
         print(f'Mean: {mean}, std: {std}')
