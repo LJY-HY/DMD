@@ -1,3 +1,6 @@
+import os
+import json
+
 import torch
 import math
 import numpy as np
@@ -12,6 +15,8 @@ from torchvision import transforms
 from torch.optim.lr_scheduler import _LRScheduler
 # import Augmentor
 import torch.nn as nn
+
+import pdb
 
 np.random.seed(0)
 
@@ -369,3 +374,38 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
 
 
 # TODO : Get exact DMD_mean and DMD_std
+# Need to verify
+def get_DMD_info(data_loader, force):
+    # Use train data if possible
+
+    if os.path.isfile("./train_data_mean_std.json") and not force:
+        with open("./train_data_mean_std.json", 'r') as jf:
+            mean, std = json.load(jf)
+
+    else:
+        mean = 0.0
+        var = 0.0
+        for images, _ in data_loader:
+            batch_samples = images.size(0) 
+            images = images.view(batch_samples, images.size(1), -1)
+            mean += images.mean(2).sum(0)
+        mean = mean / len(data_loader.dataset)
+
+        for images, _ in data_loader:
+            batch_samples = images.size(0) 
+            images = images.view(batch_samples, images.size(1), -1)
+            var += ((images - mean.unsqueeze(1))**2).sum([0,2])
+        pdb.set_trace()
+        std = torch.sqrt(var / (len(data_loader.dataset)*1280*720)) # resolution of DMD set is 1280*720
+
+        print(f'Mean: {mean}, std: {std}')
+
+        if isinstance(mean, torch.Tensor):
+            mean = mean.tolist()
+        if isinstance(std, torch.Tensor):
+            std = std.tolist()
+
+        with open("./train_data_mean_std.json", 'w') as jf:
+            json.dump([mean, std], jf)
+
+    return mean, std
