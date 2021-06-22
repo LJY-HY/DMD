@@ -30,6 +30,7 @@ def get_arguments_test():
     parser.add_argument('--optimizer', default = 'SGD', type=str, choices = ['SGD','Nesterov','Adam','AdamW'])
     parser.add_argument('--freeze', default=0.75, type=float, help = 'freeze rate of pretrained network')
     parser.add_argument('--trial', default = '0', type=str)
+    parser.add_argument('--freeze', default = 0.75, type=float, help = 'freeze rate of pretrained network')
     args = parser.parse_args()
     return args
 
