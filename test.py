@@ -42,13 +42,15 @@ def main():
     _, test_dataloader = globals()[args.test_dataset](args)
 
     # Get architecture
-    args.freeze = 1.0
     net = get_architecture(args)
     net = net.to(args.device)
 
     CE_loss = torch.nn.CrossEntropyLoss()
-    path = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'.pth'
-    result = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'.txt'
+    path = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'_'+args.option+'.pth'
+    result = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'_'+args.option+'.txt'
+
+    print(path)
+    print(result)
     
     # Load checkpoint
     state_dict = torch.load(path)

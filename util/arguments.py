@@ -17,6 +17,7 @@ def get_arguments():
     parser.add_argument('--warmup_duration', default = 10, help = 'duration of warming up')
     parser.add_argument('--trial', default = '0', type=str)
     parser.add_argument('--freeze', default=0.75, type=float, help = 'freeze rate of pretrained network')
+    parser.add_argument('--option', default='', type=str, help='path naming option')
     args = parser.parse_args()
     return args
 
@@ -25,9 +26,10 @@ def get_arguments_test():
     parser.add_argument('--gpu_id', default='0', type=int, help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--train_dataset', default='DMD', type=str, choices=['DMD','StateFarm'])
     parser.add_argument('--test_dataset',default = 'DMD', type = str, choices = ['DMD','StateFarm'])
-    parser.add_argument('--arch', default = 'MobileNet', type=str, choices = ['Inception','MobileNetv2','MobileNetv3','ShuffleNet','ResNet34','ResNet50'])
+    parser.add_argument('--arch', default = 'MobileNetv2', type=str, choices = ['Inception','MobileNetv2','MobileNetv3','ShuffleNet','ResNet34','ResNet50'])
     parser.add_argument('--batch_size', default=128, type=int, choices=[32,64,128])
     parser.add_argument('--trial', default = '0', type=str)
     parser.add_argument('--freeze', default = 0.75, type=float, help = 'freeze rate of pretrained network')
+    parser.add_argument('--option', default='', type=str, help='you can give tilt')
     args = parser.parse_args()
     return args
