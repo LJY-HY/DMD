@@ -64,8 +64,8 @@ def main():
        
     CE_loss = torch.nn.CrossEntropyLoss()
     training = ''
-    path = './checkpoint/'+args.arch+'_'+args.dataset+'_freeze_'+args.optimizer+'_'+str(args.freeze)+'.pth'
-    result = './checkpoint/'+args.arch+'_'+args.dataset+'_freeze_'+args.optimizer+'_'+str(args.freeze)+'.txt'
+    path = './checkpoint/'+args.arch+'_'+args.dataset+'_freeze_'+str(args.freeze)+'_'+args.option+'.pth'
+    result = './checkpoint/'+args.arch+'_'+args.dataset+'_freeze_'+str(args.freeze)+'_'+args.option+'.txt'
     
     best_acc=0
     acc=0

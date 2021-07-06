@@ -15,6 +15,7 @@ from torchvision import transforms
 from torch.optim.lr_scheduler import _LRScheduler
 # import Augmentor
 import torch.nn as nn
+import Augmentor
 
 import pdb
 
@@ -183,10 +184,16 @@ def get_optim_scheduler(args,net):
 
 def get_transform(mode='train'):
     normalize = transforms.Normalize(mean = mean_temp, std = std_temp)
+    p = Augmentor.Pipeline()
+    p.rotate(probability=0.6, max_left_rotation=25, max_right_rotation=25)
+    p.crop_random(probability=0.6, percentage_area=0.8)
+    p.skew(probability=0.3, magnitude=0.3)
+    #p.resize(probability=1, width=224, height=224)
     if mode == 'train':
         TF = transforms.Compose([
             transforms.Resize((640,360)),
-            CropRandomPosition(),
+            #CropRandomPosition(),
+            p.torch_transform(),
             transforms.Resize((224,224)),
             transforms.ToTensor(),
             normalize,
