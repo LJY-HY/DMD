@@ -3,7 +3,7 @@ import os
 import shutil
 from torch.utils.data import DataLoader
 from util.utils import *
-from torchvision.datasets import ImageFolder
+from dataset.ImageFolder import ImageFolder
 
 def StateFarm(args):
     '''
@@ -28,20 +28,30 @@ def StateFarm(args):
     train_TF = get_transform('train')
     test_TF = get_transform('test')
 
-    train_subject_list, test_subject_list = divide_subject()
-
-    make_ImageFolder(train_subject_list, division = 'train')
-    make_ImageFolder(test_subject_list, division = 'test')
+    train_subject_list, val_subject_list, test_subject_list = divide_subject(args)
+    if train_subject_list != test_subject_list:
+        make_ImageFolder(train_subject_list, division = 'train')
+        make_ImageFolder(val_subject_list, division='val')
+        make_ImageFolder(test_subject_list, division = 'test')
+    else:
+        make_ImageFolder_deployment(train_subject_list)
 
     train_dataset = ImageFolder(root = '/data/driver_detection/train', transform = train_TF)
+    val_dataset = ImageFolder(root = '/data/driver_detection/val', transform = test_TF)
     test_dataset = ImageFolder(root = '/data/driver_detection/test', transform = test_TF)
 
-    train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
-    test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 16)
+    num_workers = 16
+    if 'correction' in dir(args):
+        if args.correction:
+            num_workers = 0
+    
+    train_dataloader = DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True, num_workers = num_workers)
+    val_dataloader = DataLoader(val_dataset, batch_size = args.batch_size, shuffle = False, num_workers = num_workers)
+    test_dataloader = DataLoader(test_dataset, batch_size = args.batch_size, shuffle = False, num_workers = num_workers)
 
-    return train_dataloader, test_dataloader
+    return train_dataloader, val_dataloader, test_dataloader
 
-def divide_subject():
+def divide_subject(args):
     # divide subject
     subject_list = []
     train_subject_list = []
@@ -54,17 +64,21 @@ def divide_subject():
         line = [subject]
         '''
         subject_list.append(line[0])
-    for idx, subject in enumerate(subject_list):
-        if idx<int(len(subject_list)*6/7):
-            train_subject_list.append(subject)      # 22 train subjects
-        else:
-            test_subject_list.append(subject)       # 5 train subjects
+    train_subject_list = subject_list[1:int(len(subject_list)*5/7)]
+    val_subject_list = subject_list[int(len(subject_list)*5/7):int(len(subject_list)*6/7)]
+    test_subject_list = subject_list[int(len(subject_list)*6/7):int(len(subject_list))]
     del train_subject_list[0]                       # del 'subject' in train subject list
 
     f.close()
-    print('Train Subjects : ', train_subject_list)
-    print('Test  Subjects : ', test_subject_list)
-    return train_subject_list, test_subject_list
+    if 'deployment_subject' in dir(args):
+        train_subject_list = [args.deployment_subject]
+        val_subject_list = [args.deployment_subject]
+        test_subject_list = [args.deployment_subject]
+
+    print('Train      Subjects : ', train_subject_list)
+    print('Validation Subjects : ', val_subject_list)
+    print('Test       Subjects : ', test_subject_list)
+    return train_subject_list, val_subject_list, test_subject_list
 
 def make_ImageFolder(subject_list, division = 'train'):
     '''
@@ -107,7 +121,6 @@ def make_ImageFolder(subject_list, division = 'train'):
         subject = line[0]
         c_num = line[1]
         img_name = line[2]
-
         if subject == 'subject':
             continue
         class_name = converting_dict[c_num]
@@ -128,3 +141,72 @@ def make_ImageFolder(subject_list, division = 'train'):
     
     for non_existing_label in None_Existing_Labels:
         os.makedirs(path+'/'+division+'/'+non_existing_label)
+
+def make_ImageFolder_deployment(subject_list):
+    '''
+    Make Imagefolder directory for DEPLOYMENT
+
+    train subject = test subject
+    train : val : test = 0.6 : 0.2 : 0.2
+
+    division_dict = {'safe_drive'          : [],
+                     'texting'             : [],
+                     'phonecall'           : [],
+                     'radio'               : [],
+                     'drinking'            : [],
+                     'reach_backseat'      : [],
+                     'hair_and_makeup'     : [],
+                     'talking_to_passenger : []
+                    }
+    '''
+    path = '/data/driver_detection/'
+
+    converting_dict = {'c0':'safe_drive',
+                     'c1':'texting',
+                     'c2':'phonecall',
+                     'c3':'texting',
+                     'c4':'phonecall',
+                     'c5':'radio',
+                     'c6':'drinking',
+                     'c7':'reach_backseat',
+                     'c8':'hair_and_makeup',
+                     'c9':'talking_to_passenger'
+                     }
+    None_Existing_Labels = ['change_gear','reach_side','standstill_or_waiting']
+
+    division_dict = {}                                  # could be 'train' or 'test'
+    for cN in converting_dict:
+        division_dict[converting_dict[cN]] = []
+
+    f = open('/data/driver_detection/driver_imgs_list.csv','r',encoding='utf-8-sig',newline='')
+    rdr = csv.reader(f)
+
+    for line in rdr:
+        '''
+        line = [subject,class_name,img_name]
+        '''
+        subject = line[0]
+        c_num = line[1]
+        img_name = line[2]
+
+        if subject == 'subject':
+            continue
+        class_name = converting_dict[c_num]
+
+        if subject in subject_list:
+            division_dict[class_name].append(img_name)     # assign file_name according to its class
+    f.close()
+    # if already dir and data is in the tree, empty it and re-fill
+
+    for division,ratio_s,ratio_e in zip(['train','val','test'],[0.0,0.6,0.8],[0.6,0.8,1.0]):
+        if os.path.exists(path+division):
+            shutil.rmtree(path+division)
+        for label in division_dict:
+            length = len(division_dict[label])
+            if not os.path.exists(path+'/'+division+'/'+label):
+                os.makedirs(path+'/'+division+'/'+label)
+            for file in division_dict[label][int(length*ratio_s):int(length*ratio_e)]:
+                shutil.copy(path+'imgs/'+file,path+'/'+division+'/'+label)
+        
+        for non_existing_label in None_Existing_Labels:
+            os.makedirs(path+'/'+division+'/'+non_existing_label)

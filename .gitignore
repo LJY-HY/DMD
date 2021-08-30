@@ -2,5 +2,8 @@
 *.txt
 *.sh
 */__pycache__/*
-checkpoint/
+checkpoint/*
 *.pyc
+*.pth
+*.txt
+./t_SNE/*

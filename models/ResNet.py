@@ -245,7 +245,25 @@ class ResNet(nn.Module):
 
         return x
 
-    def forward(self, x: Tensor) -> Tensor:
+    def _forward_impl_encoder(self, x: Tensor) -> Tensor:
+        # See note [TorchScript super()]
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        return x
+
+    def forward(self, x: Tensor, special_output = None) -> Tensor:
+        if special_output == 'encoder':
+            return self._forward_impl_encoder(x)
         return self._forward_impl(x)
 
 

@@ -1,9 +1,5 @@
-from dataset.build_StateFarm import StateFarm
 import torch
 import torch.nn.functional as F
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
-from torch.utils.data import DataLoader
 
 from tqdm import tqdm
 import argparse
@@ -12,36 +8,6 @@ from util.arguments import get_arguments
 from util.utils import *
 from dataset.build_DMD import DMD
 from dataset.build_StateFarm import StateFarm
-
-def get_cifar10(args):
-    mean = (0.5071, 0.4865, 0.4408)
-    std = (0.2673, 0.2564, 0.2762)
-    path = '~/datasets/cifar10'
-
-    transform_train = transforms.Compose([
-            transforms.RandomCrop(32,padding=4),
-            #transforms.Resize((300,300)),       #Inception
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean,std),
-            ])
-
-    transform_test = transforms.Compose([
-        #transforms.Resize((300,300)),       #Inception
-        transforms.ToTensor(),
-        transforms.Normalize(mean,std),
-        ])
-
-    train_loader = DataLoader(
-            datasets.CIFAR10(root=path, train=True, download=True, transform=transform_train),
-            batch_size=256, shuffle=False
-    )
-    test_loader = DataLoader(
-            datasets.CIFAR10(root=path, train=False, download=True, transform=transform_test),
-            batch_size=500, shuffle=False
-    )
-    return train_loader, test_loader
-    
 
 def main():
     # argument parsing
@@ -53,7 +19,7 @@ def main():
     # args.num_classes = 11 if args.dataset=='DMD' else 10
 
     # Get Dataset
-    train_dataloader, test_dataloader = globals()[args.dataset](args)
+    train_dataloader, val_dataloader, test_dataloader = globals()[args.dataset](args)
 
     # Get architecture
     net = get_architecture(args)
@@ -107,6 +73,7 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
             outputs = net(inputs)
 
         loss = CE_loss(outputs,targets)
+
         optimizer.zero_grad()
 
         loss.backward()

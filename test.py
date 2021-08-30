@@ -39,15 +39,21 @@ def main():
         args.test_subject = int(subject_num)
 
 
-    _, test_dataloader = globals()[args.test_dataset](args)
+    _, _, test_dataloader = globals()[args.test_dataset](args)
 
     # Get architecture
     net = get_architecture(args)
     net = net.to(args.device)
 
     CE_loss = torch.nn.CrossEntropyLoss()
-    path = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'_'+args.option+'.pth'
-    result = './checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)+'_'+args.option+'.txt'
+    name ='./checkpoint/'+args.arch+'_'+args.train_dataset+'_freeze_'+str(args.freeze)
+    if args.option is not None:
+        path = name+'_'+args.option+'.pth'
+        result = name+'_'+args.option+'.txt'
+    else:
+        path = name+'.pth'
+        result = name+'.txt'
+    
 
     print(path)
     print(result)
@@ -74,7 +80,11 @@ def test(args, net, test_dataloader):
     acc = 0
     p_bar = tqdm(range(test_dataloader.__len__()))
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate(test_dataloader):
+        for batch_idx, items in enumerate(test_dataloader):
+            if len(items)==3:
+                inputs, targets, index = items
+            else:
+                inputs, targets = items
             inputs, targets = inputs.to(args.device), targets.to(args.device)
             outputs = net(inputs)
             loss = F.cross_entropy(outputs, targets)
