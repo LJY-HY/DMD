@@ -5,5 +5,5 @@
 checkpoint/*
 *.pyc
 *.pth
-*.txt
-./t_SNE/*
+./*.txt
+/t_SNE

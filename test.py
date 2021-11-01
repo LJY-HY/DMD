@@ -12,6 +12,7 @@ from util.arguments import get_arguments_test
 from util.utils import *
 from dataset.build_DMD import DMD
 from dataset.build_StateFarm import StateFarm
+from dataset.build_DMD_deployment import DMD_deployment
 
 def main():
     # argument parsing
@@ -38,7 +39,8 @@ def main():
             check_subject.close()
         args.test_subject = int(subject_num)
 
-
+    if args.test_dataset=='DMD_deployment':
+        args.dataset = args.test_dataset
     _, _, test_dataloader = globals()[args.test_dataset](args)
 
     # Get architecture
@@ -53,8 +55,7 @@ def main():
     else:
         path = name+'.pth'
         result = name+'.txt'
-    
-
+    path = 'checkpoint/deployment/ResNet50_deployment_on_DMD_threshold_0.05_often_10_im.pth'
     print(path)
     print(result)
     
@@ -76,6 +77,7 @@ def main():
 
 def test(args, net, test_dataloader):
     net.eval()
+    output_labels = []
     test_loss = 0
     acc = 0
     p_bar = tqdm(range(test_dataloader.__len__()))
@@ -97,7 +99,14 @@ def test(args, net, test_dataloader):
                     loss=test_loss/(batch_idx+1)))
             p_bar.update()
             acc+=sum(outputs.argmax(dim=1)==targets)
+            output_labels+=outputs.argmax(dim=1).tolist()
     p_bar.close()
+    f = open('/home/esoc/LeeJaeyoon/DMD/ImgsName_TrueLabel_OutputLabel','w')
+    for i in range(len(test_dataloader.dataset)):
+        ImgsName,TrueLabel = test_dataloader.dataset.samples[i]
+        Line = str(ImgsName)+' '+str(TrueLabel)+' '+str(output_labels[i])+'\n'
+        f.write(Line)
+    f.close()
     acc = acc/test_dataloader.dataset.__len__()
     print('Accuracy :'+ '%0.4f'%acc )
     return acc

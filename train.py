@@ -64,9 +64,8 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     acc = 0
     p_bar = tqdm(range(train_dataloader.__len__()))
     loss_average = 0
-    for batch_idx, (inputs, targets) in enumerate(train_dataloader):
+    for batch_idx, (inputs, targets, index) in enumerate(train_dataloader):
         inputs, targets = inputs.to(args.device), targets.to(args.device)     
-
         if args.arch == 'Inception':
             outputs,_ = net(inputs)
         else :

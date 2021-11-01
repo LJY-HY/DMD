@@ -10,6 +10,7 @@ from models.MobileNetV3 import *
 from models.InceptionV3 import *
 from models.ShuffleNetV2 import *
 from models.ResNet import *
+# from models.ResNet3D import *
 import torch.optim as optim
 from torchvision import transforms
 from torch.optim.lr_scheduler import _LRScheduler
@@ -160,6 +161,13 @@ def get_architecture(args):
                         nn.Dropout(p=0.2),
                         nn.Linear(in_channel_2,args.num_classes),
                         )
+    
+    elif args.arch in ['ResNet3D']:
+        net = r3d_18(pretrained=True).to(args.device)
+        '''
+        r2plus1d_18의 feature output channel수 check해서 fc layer다시 짜기
+        '''
+
 
     return net
 
