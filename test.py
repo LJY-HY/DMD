@@ -77,7 +77,7 @@ def main():
 
 def test(args, net, test_dataloader):
     net.eval()
-    output_labels = []
+    output_labels = [0 for _ in range(11)]
     test_loss = 0
     acc = 0
     p_bar = tqdm(range(test_dataloader.__len__()))
@@ -87,6 +87,7 @@ def test(args, net, test_dataloader):
                 inputs, targets, index = items
             else:
                 inputs, targets = items
+            output_labels[targets]+=1
             inputs, targets = inputs.to(args.device), targets.to(args.device)
             outputs = net(inputs)
             loss = F.cross_entropy(outputs, targets)

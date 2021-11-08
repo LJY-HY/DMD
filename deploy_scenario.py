@@ -184,6 +184,7 @@ def test(args, net, dataloader, scheduler, mode):
     p_bar = tqdm(range(dataloader.__len__()))
     with torch.no_grad():
         for batch_idx, (inputs, targets, index) in enumerate(dataloader):
+            import pdb;pdb.set_trace()
             inputs, targets = inputs.to(args.device), targets.to(args.device)
             outputs = net(inputs)
             loss = F.cross_entropy(outputs, targets)

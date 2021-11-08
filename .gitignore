@@ -7,3 +7,4 @@ checkpoint/*
 *.pth
 ./*.txt
 /t_SNE
+*.mp4
